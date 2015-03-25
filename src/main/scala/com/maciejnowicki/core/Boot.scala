@@ -4,6 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
+import com.maciejnowicki.models.DateTimeEvent
 import play.api.libs.iteratee.Iteratee
 import reactivemongo.api.collections.GenericQueryBuilder
 import reactivemongo.api.collections.default.BSONCollection
