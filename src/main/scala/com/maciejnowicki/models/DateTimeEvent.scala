@@ -1,6 +1,7 @@
 package com.maciejnowicki.models
 
 import com.maciejnowicki.core.MongoDB
+import com.maciejnowicki.utils.TimeUtils
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import reactivemongo.api.collections.default.BSONCollection
@@ -19,6 +20,22 @@ object DateTimeEvent {
   val collection = MongoDB.db[BSONCollection]("dateTimeEvents")
 
 
+  def getByDate(from: Option[DateTime], to: Option[DateTime] = None, provider: Option[String] = None, user: Option[String] = None): Future[List[DateTimeEvent]] = {
+
+    val fromQuery = from.map(from => {
+      BSONDocument("from" -> BSONDocument("$gte" -> BSONDateTime(from.getMillis)))
+    }).get
+
+
+    collection.find(fromQuery).cursor.collect[List]().map{
+      result => {
+        result.map(DateTimeEventFormat.read(_))
+      }
+    }
+
+  }
+
+
   def deleteAllByProvider(provider: String): Future[Int] = {
     val query = BSONDocument("provider" -> provider)
     val remove = collection.remove(query)
@@ -28,14 +45,14 @@ object DateTimeEvent {
   def getLatestByFromDate(provider: String, user: String): Future[Option[DateTimeEvent]] = {
 
     val query = BSONDocument("provider" -> provider, "user" -> user)
-    val sort = BSONDocument("fromDate" -> -1)
+    val sort = BSONDocument("from" -> -1)
 
     val result = collection.find(query).sort(sort).one
 
 
     result.map(_.map {
       doc => {
-        DataTimeEventFormat.read(doc)
+        DateTimeEventFormat.read(doc)
       }
     })
   }
@@ -47,7 +64,7 @@ object DateTimeEvent {
       docFuture => {
         docFuture.map {
           doc => {
-            DataTimeEventFormat.read(doc)
+            DateTimeEventFormat.read(doc)
           }
         }
       }
@@ -59,7 +76,7 @@ object DateTimeEvent {
     val futureOptionDoc = collection.find(query).one
     futureOptionDoc map {
       _ map {
-        doc => DataTimeEventFormat.read(doc)
+        doc => DateTimeEventFormat.read(doc)
       }
     }
   }
@@ -94,7 +111,7 @@ object DateTimeEvent {
   }
 
   private[this] def update(dataTimeEvent: DateTimeEvent): Unit = {
-    val doc = DataTimeEventFormat.write(dataTimeEvent)
+    val doc = DateTimeEventFormat.write(dataTimeEvent)
     val modifier = BSONDocument(
       "$set" -> doc
     )
@@ -109,20 +126,20 @@ object DateTimeEvent {
   private[this] def insert(dataTimeEvent: DateTimeEvent): Future[String] = {
     val id = BSONObjectID.generate.stringify
     val dataWithGeneratedId = dataTimeEvent.copy(id = id)
-    collection.insert(DataTimeEventFormat.write(dataWithGeneratedId)).map(x => id)
+    collection.insert(DateTimeEventFormat.write(dataWithGeneratedId)).map(x => id)
   }
 
 }
 
-object DataTimeEventFormat extends BSONDocumentReader[DateTimeEvent] with BSONDocumentWriter[DateTimeEvent] {
+object DateTimeEventFormat extends BSONDocumentReader[DateTimeEvent] with BSONDocumentWriter[DateTimeEvent] {
   val fmt = ISODateTimeFormat.dateTime();
 
   override def write(event: DateTimeEvent): BSONDocument = BSONDocument(
     "_id" -> event.id,
     "provider" -> event.provider,
     "user" -> event.user,
-    "from" -> fmt.print(event.from),
-    "to" -> fmt.print(event.to)
+    "from" -> BSONDateTime(event.from.getMillis),
+    "to" -> BSONDateTime(event.to.getMillis)
   )
 
   override def read(bson: BSONDocument): DateTimeEvent = {
@@ -130,13 +147,13 @@ object DataTimeEventFormat extends BSONDocumentReader[DateTimeEvent] with BSONDo
       bson.getAs[String]("_id").get,
       bson.getAs[String]("provider").get,
       bson.getAs[String]("user").get,
-      toDataTime(bson.getAs[String]("from").get),
-      toDataTime(bson.getAs[String]("to").get)
+      toDataTime(bson.getAs[BSONDateTime]("from").get),
+      toDataTime(bson.getAs[BSONDateTime]("to").get)
     )
   }
 
-  def toDataTime(isoDataTime: String): DateTime = {
-    DateTime.parse(isoDataTime, fmt)
+  def toDataTime(bsonDataTime: BSONDateTime): DateTime = {
+    new DateTime(bsonDataTime.value)
   }
 
 

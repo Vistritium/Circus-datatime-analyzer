@@ -93,6 +93,43 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
     }
 
+    "removeByDate should work" in {
+      println("Start 3")
+      removeAllTestElements()
+
+      val date = exampleEvent.from
+
+      val beforeDateEvents =   List(
+        exampleEvent.copy(from = exampleEvent.from.minusMinutes(1)),
+        exampleEvent.copy(from = exampleEvent.from.minusHours(1)),
+        exampleEvent.copy(from = exampleEvent.from.minusDays(1)),
+        exampleEvent.copy(from = exampleEvent.from.minusYears(1))
+      )
+
+      val afterDateEvents = List(
+        exampleEvent.copy(from = exampleEvent.from.plusMinutes(1)),
+        exampleEvent.copy(from = exampleEvent.from.plusHours(1)),
+        exampleEvent.copy(from = exampleEvent.from.plusDays(1)),
+        exampleEvent.copy(from = exampleEvent.from.plusYears(1))
+      )
+
+      Await.result(Future.sequence(beforeDateEvents map DateTimeEvent.insertUpdate), 10 seconds)
+
+      val newIndexes = Await.result(Future.sequence(afterDateEvents map DateTimeEvent.insertUpdate), 10 seconds)
+
+      newIndexes foreach(_.isDefined must beTrue)
+
+      val afterDateEventsWithNewIndexes = afterDateEvents.zip(newIndexes).map(x => x._1.copy(id = x._2.get))
+
+
+      val result = Await.result(DateTimeEvent.getByDate(Some(date)), 30 seconds)
+
+      println("Ending 3")
+      result.toSet must beEqualTo(afterDateEventsWithNewIndexes.toSet)
+
+
+    }
+
   }
 
 
