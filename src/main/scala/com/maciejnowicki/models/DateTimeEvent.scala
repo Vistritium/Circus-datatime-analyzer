@@ -22,12 +22,27 @@ object DateTimeEvent {
 
   def getByDate(from: Option[DateTime], to: Option[DateTime] = None, provider: Option[String] = None, user: Option[String] = None): Future[List[DateTimeEvent]] = {
 
+    require(from.isDefined || to.isDefined, "from or to date must be defined")
+
     val fromQuery = from.map(from => {
-      BSONDocument("from" -> BSONDocument("$gte" -> BSONDateTime(from.getMillis)))
-    }).get
+      BSONDocument("to" -> BSONDocument("$gte" -> BSONDateTime(from.getMillis)))
+    })
 
+    val toQuery = to.map(to => {
+      BSONDocument("from" -> BSONDocument("$lt" -> BSONDateTime(to.getMillis)))
+    })
 
-    collection.find(fromQuery).cursor.collect[List]().map{
+    val providerQuery = provider.map(provider => {
+      BSONDocument("provider" -> provider)
+    })
+
+    val userQuery = user.map(user => {
+      BSONDocument("user" -> user)
+    })
+
+    val query = (fromQuery :: toQuery :: providerQuery :: userQuery :: Nil).flatten.reduce((x, y) => x.add(y))
+
+    collection.find(query).cursor.collect[List]().map{
       result => {
         result.map(DateTimeEventFormat.read(_))
       }

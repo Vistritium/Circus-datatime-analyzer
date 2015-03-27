@@ -48,12 +48,9 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
       updated.isDefined must beFalse
 
-
       val retrieved = Await.result(DateTimeEvent.get(changedElem.id), 5 seconds)
 
-
       retrieved.isDefined must beTrue
-
 
       println("Ending 1")
 
@@ -94,8 +91,9 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
     }
 
     "removeByDate should work" in {
+      sequential
       println("Start 3")
-      removeAllTestElements()
+
 
       val date = exampleEvent.from
 
@@ -113,19 +111,40 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
         exampleEvent.copy(from = exampleEvent.from.plusYears(1))
       )
 
-      Await.result(Future.sequence(beforeDateEvents map DateTimeEvent.insertUpdate), 10 seconds)
 
-      val newIndexes = Await.result(Future.sequence(afterDateEvents map DateTimeEvent.insertUpdate), 10 seconds)
+      "getyDate only with from argument should work" in {
 
-      newIndexes foreach(_.isDefined must beTrue)
-
-      val afterDateEventsWithNewIndexes = afterDateEvents.zip(newIndexes).map(x => x._1.copy(id = x._2.get))
+        removeAllTestElements()
 
 
-      val result = Await.result(DateTimeEvent.getByDate(Some(date)), 30 seconds)
+        Await.result(Future.sequence(beforeDateEvents map DateTimeEvent.insertUpdate), 10 seconds)
 
-      println("Ending 3")
-      result.toSet must beEqualTo(afterDateEventsWithNewIndexes.toSet)
+        val newIndexes = Await.result(Future.sequence(afterDateEvents map DateTimeEvent.insertUpdate), 10 seconds)
+
+        newIndexes foreach(_.isDefined must beTrue)
+
+        val afterDateEventsWithNewIndexes = afterDateEvents.zip(newIndexes).map(x => x._1.copy(id = x._2.get))
+
+        val result = Await.result(DateTimeEvent.getByDate(Some(date)), 30 seconds)
+
+
+        result.toSet must beEqualTo(afterDateEventsWithNewIndexes.toSet)
+      }
+
+
+
+      "getByDate with user specified should work " in {
+
+
+        val (left, right) = afterDateEvents.splitAt(2)
+
+
+
+
+      }
+
+
+
 
 
     }
