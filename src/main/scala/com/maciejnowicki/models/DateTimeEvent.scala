@@ -144,6 +144,25 @@ object DateTimeEvent {
     collection.insert(DateTimeEventFormat.write(dataWithGeneratedId)).map(x => id)
   }
 
+
+  def convertToUserAggregatedEvents(events: List[DateTimeEvent]): BSONValue = {
+    val userGrouped = events.groupBy(_.user)
+
+    val result = userGrouped.map(x => {
+      BSONDocument(
+      "name" -> x._1,
+      "times" -> x._2.map(event => {
+        BSONDocument(
+        "appear" -> event.from.toString(TimeUtils.dateTimeFormatter),
+        "disappear" -> event.to.toString(TimeUtils.dateTimeFormatter)
+        )
+      })
+      )
+    })
+
+    BSONArray(result)
+  }
+
 }
 
 object DateTimeEventFormat extends BSONDocumentReader[DateTimeEvent] with BSONDocumentWriter[DateTimeEvent] {

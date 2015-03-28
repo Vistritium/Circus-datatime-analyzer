@@ -23,21 +23,13 @@ object Boot extends App {
   implicit val system = ActorSystem("circus-datatime-analyzer")
 
   // create and start our service actor
-  val service = system.actorOf(Props[MyServiceActor], "mainService")
+  val service = system.actorOf(Props[App], "mainService")
 
   implicit val timeout = Timeout(5.seconds)
   // start a new HTTP server on port 8080 with our service actor as the handler
   IO(Http) ? Http.Bind(service, interface = "localhost", port = Configs.port)
 
   MongoDB.init()
-
-  val query = BSONDocument("name" -> "Maciej")
-
-  val collection = MongoDB.db[BSONCollection]("test")
-  val list = Await.result(collection.find(query).cursor[BSONDocument].collect[List](), 5 seconds)
-  list.foreach(x => {
-    BSONDocument.pretty(x)
-  })
 
 
   def doSomething(): Unit ={
