@@ -11,4 +11,6 @@ object Configs {
   val mongoDBHost = config.getString("mongo.host")
   val mongoDBName = config.getString("mongo.db")
 
+  val eventPingTolerance = config.getInt("events.pingTolerance")
+
 }

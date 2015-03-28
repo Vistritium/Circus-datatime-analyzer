@@ -1,12 +1,16 @@
 package com.maciejnowicki.models
 
+import java.text.MessageFormat
+
 import com.maciejnowicki.core.MongoDB
 import com.maciejnowicki.utils.TimeUtils
+import org.apache.logging.log4j.Logger
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, _}
 import reactivemongo.core.commands.Count
+import spray.json.{JsArray, JsObject, JsString, JsValue}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -23,6 +27,8 @@ object DateTimeEvent {
   def getByDate(from: Option[DateTime], to: Option[DateTime] = None, provider: Option[String] = None, user: Option[String] = None): Future[List[DateTimeEvent]] = {
 
     require(from.isDefined || to.isDefined, "from or to date must be defined")
+
+    println(s"geting from $from to $to with provider $provider with user $user")
 
     val fromQuery = from.map(from => {
       BSONDocument("to" -> BSONDocument("$gte" -> BSONDateTime(from.getMillis)))
@@ -42,8 +48,10 @@ object DateTimeEvent {
 
     val query = (fromQuery :: toQuery :: providerQuery :: userQuery :: Nil).flatten.reduce((x, y) => x.add(y))
 
-    collection.find(query).cursor.collect[List]().map{
+    collection.find(query).cursor.collect[List]().map {
       result => {
+        val size = result.size
+        println(MessageFormat.format("returning {0} elements", size.toString))
         result.map(DateTimeEventFormat.read(_))
       }
     }
@@ -145,22 +153,26 @@ object DateTimeEvent {
   }
 
 
-  def convertToUserAggregatedEvents(events: List[DateTimeEvent]): BSONValue = {
+  def convertToUserAggregatedEvents(events: List[DateTimeEvent]): JsArray = {
     val userGrouped = events.groupBy(_.user)
 
     val result = userGrouped.map(x => {
-      BSONDocument(
-      "name" -> x._1,
-      "times" -> x._2.map(event => {
-        BSONDocument(
-        "appear" -> event.from.toString(TimeUtils.dateTimeFormatter),
-        "disappear" -> event.to.toString(TimeUtils.dateTimeFormatter)
+
+      val list = x._2.map(event => {
+        JsObject(
+          "appear" -> JsString(event.from.toString(TimeUtils.dateTimeFormatter)),
+          "disappear" -> JsString(event.to.toString(TimeUtils.dateTimeFormatter))
         )
       })
-      )
+      val jsArray: JsArray = JsArray(list.toVector)
+
+      JsObject(
+        "name" -> JsString(x._1),
+        "times" -> jsArray)
+
     })
 
-    BSONArray(result)
+    JsArray(result.toVector)
   }
 
 }

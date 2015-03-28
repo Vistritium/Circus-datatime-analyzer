@@ -4,6 +4,7 @@ import org.joda.time.DateTime
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
 
+
 import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
 
@@ -133,7 +134,7 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
 
 
-      "getByDate with user specified should work " in {
+/*      "getByDate with user specified should work " in {
 
 
         val (left, right) = afterDateEvents.splitAt(2)
@@ -141,7 +142,7 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
 
 
-      }
+      }*/
 
 
 
