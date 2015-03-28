@@ -1,6 +1,6 @@
 package com.maciejnowicki.core
 
-import reactivemongo.api.MongoDriver
+import reactivemongo.api.{MongoConnection, MongoDriver}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -9,10 +9,23 @@ object MongoDB {
   // gets an instance of the driver
   // (creates an actor system)
   private[this] val driver = new MongoDriver
-  private[this] val connection = driver.connection(List(Configs.mongoDBHost))
+  private[this] val connection = Configs.mongoUri match {
+    case Some(x) => {
+      println("Got mongo uri: " + x)
+      driver.connection(MongoConnection.parseURI(x).get)
+    }
+    case None => driver.connection(List(Configs.mongoDBHost))
+  }
+
+
 
   // Gets a reference to the database "plugin"
-  val db = connection(Configs.mongoDBName)
+  val db = connection(Configs.mongoUri match {
+    case Some(x) => MongoConnection.parseURI(x).get.db.getOrElse(Configs.mongoDBName)
+    case None => Configs.mongoDBName
+  })
+
+    //connection(Configs.mongoDBName)
 
   def init(): Unit ={
     //initializes this object..

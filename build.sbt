@@ -1,3 +1,7 @@
+import com.typesafe.sbt.SbtStartScript
+
+seq(SbtStartScript.startScriptForClassesSettings: _*)
+
 name := """circus-datatime-analyzer"""
 
 organization  := "com.maciejnowicki"
