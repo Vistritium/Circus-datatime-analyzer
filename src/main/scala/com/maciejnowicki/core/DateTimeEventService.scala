@@ -59,6 +59,18 @@ trait DateTimeEventService extends HttpService {
           }
         }
       }
+    } ~ path("pingEvents") {
+      post {
+        entity(as[List[PingEventRequest]]){
+          pingEventRequests => {
+            val futuresRes = pingEventRequests.map(pingEvent(_))
+            val futureRes: Future[List[String]] = Future.sequence(futuresRes)
+            val futureStringRes = futureRes.map(_.mkString("\n"))
+
+            complete(futureStringRes)
+          }
+        }
+      }
     }
 
   def updateEvent() = {

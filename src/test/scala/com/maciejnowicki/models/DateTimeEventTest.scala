@@ -1,5 +1,6 @@
 package com.maciejnowicki.models
 
+import com.maciejnowicki.DBTestUtils
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
@@ -26,7 +27,7 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
     s"should insert, update, retrieve and remove $name from database" in {
       println("Start 1")
 
-      removeAllTestElements()
+      DBTestUtils.removeAllTestElements()
 
       val toInsert = exampleEvent;
 
@@ -63,7 +64,7 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
     "getLatestByFromDate should get lastest element by fromDate field" in {
       println("Start 2")
 
-      removeAllTestElements();
+      DBTestUtils.removeAllTestElements()
 
       val minusSeconds = exampleEvent.copy(from = exampleEvent.from.minusSeconds(1))
 
@@ -115,7 +116,7 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
       "getyDate only with from argument should work" in {
 
-        removeAllTestElements()
+        DBTestUtils.removeAllTestElements()
 
 
         Await.result(Future.sequence(beforeDateEvents map DateTimeEvent.insertUpdate), 10 seconds)
@@ -153,11 +154,5 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
   }
 
 
-  private def removeAllTestElements(): Unit = {
-    //remove existing elements
-    val map = DateTimeEvent.deleteAllByProvider(providerName).map{
-      n => println("Deleted " + n +" elements")
-    }
-    Await.result(map, 5 seconds)
-  }
+
 }
