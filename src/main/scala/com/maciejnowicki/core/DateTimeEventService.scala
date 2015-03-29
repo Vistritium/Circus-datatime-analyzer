@@ -61,7 +61,7 @@ trait DateTimeEventService extends HttpService {
       }
     } ~ path("pingEvents") {
       post {
-        entity(as[List[PingEventRequest]]){
+        entity(as[List[PingEventRequest]]) {
           pingEventRequests => {
             val futuresRes = pingEventRequests.map(pingEvent(_))
             val futureRes: Future[List[String]] = Future.sequence(futuresRes)
@@ -77,7 +77,7 @@ trait DateTimeEventService extends HttpService {
       }
     }
 
-  def getProviders(): Future[JsArray] ={
+  def getProviders(): Future[JsArray] = {
     DateTimeEvent.getProviders() map { list =>
       JsArray(list.map(JsString(_)).toVector)
     }
@@ -125,9 +125,35 @@ trait DateTimeEventService extends HttpService {
       Left("from and to were empty, one must be defined")
     } else {
 
-      val res = DateTimeEvent.getByDate(getDataRequest.from, getDataRequest.to, getDataRequest.provider)
+      val res = {
+        val rawEvents = DateTimeEvent.getByDate(getDataRequest.from, getDataRequest.to, getDataRequest.provider)
+
+        getDataRequest.nameFilter match {
+          case Some(x) if x.isEmpty || x.forall(_ == ' ') => rawEvents
+          case Some(x) => {
+
+            val searches = x.toLowerCase().split(" ")
+
+            rawEvents map {
+              events => {
+                events.filter(event => {
+                  val eventUser = event.user.toLowerCase
+                  searches.exists(x => x.contains(eventUser) || eventUser.contains(x))
+                })
+              }
+            }
+
+          }
+          case None => rawEvents
+        }
+
+
+      }
+
 
       val userAggregatedRes = res map DateTimeEvent.convertToUserAggregatedEvents
+
+
 
       Right(userAggregatedRes)
     }
