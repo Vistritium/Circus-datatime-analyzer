@@ -26,7 +26,8 @@ function fetchData(from, to, filter, onDone) {
     var postData = JSON.stringify({
         nameFilter: filter,
         from: from.toISOString(),
-        to: to.toISOString()
+        to: to.toISOString(),
+        provider: provider
     });
 
     console.log(postData)
@@ -188,3 +189,13 @@ $(window).ready(function(){
         }
     });
 });
+
+var provider = function(){
+    var pathname = $(location).attr('pathname')
+
+    var splitted = pathname.split('/')
+
+    var provider = splitted[splitted.length - 1]
+
+    return provider;
+}()

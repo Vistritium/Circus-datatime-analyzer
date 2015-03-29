@@ -13,14 +13,12 @@ import scala.concurrent.duration._
 class DateTimeEventTest extends Specification with NoTimeConversions {
   sequential
 
-  val providerName = "testProvider";
-
   val name = DateTimeEvent.getClass.getSimpleName
 
   val fromDate = DateTime.now();
   val toDate = fromDate.plusHours(2).plusMinutes(15)
 
-  val exampleEvent = DateTimeEvent("0", providerName, "testUser", fromDate, toDate)
+  val exampleEvent = DateTimeEvent("0", DBTestUtils.testProvider, "testUser", fromDate, toDate)
 
   "Test DateTimeEventTest interaction with database" in {
 
@@ -37,7 +35,7 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
 
       val elem = {
-        val opt = Await.result(DateTimeEvent.getAnyElementByProvider(providerName), 5 seconds)
+        val opt = Await.result(DateTimeEvent.getAnyElementByProvider(DBTestUtils.testProvider), 5 seconds)
 
         opt.isDefined must beTrue
 
@@ -82,7 +80,7 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
       val minusSecondsWithNewId = minusSeconds.copy(id = inserted.head.get)
 
-      val latest = Await.result(DateTimeEvent.getLatestByFromDate(providerName, exampleEvent.user), 5 seconds)
+      val latest = Await.result(DateTimeEvent.getLatestByFromDate(DBTestUtils.testProvider, exampleEvent.user), 5 seconds)
 
       latest.isDefined must beTrue
 
@@ -90,6 +88,7 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
       latest.get must beEqualTo(minusSecondsWithNewId)
 
+      ok
     }
 
     "removeByDate should work" in {
@@ -104,14 +103,14 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
         exampleEvent.copy(from = exampleEvent.from.minusHours(1)),
         exampleEvent.copy(from = exampleEvent.from.minusDays(1)),
         exampleEvent.copy(from = exampleEvent.from.minusYears(1))
-      )
+      ).map(x => x.copy(to = x.from.plusMillis(1)))
 
       val afterDateEvents = List(
         exampleEvent.copy(from = exampleEvent.from.plusMinutes(1)),
         exampleEvent.copy(from = exampleEvent.from.plusHours(1)),
         exampleEvent.copy(from = exampleEvent.from.plusDays(1)),
         exampleEvent.copy(from = exampleEvent.from.plusYears(1))
-      )
+      ).map(x => x.copy(to = x.from.plusMillis(1)))
 
 
       "getyDate only with from argument should work" in {
@@ -130,7 +129,11 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
         val result = Await.result(DateTimeEvent.getByDate(Some(date)), 30 seconds)
 
 
+        result.size must beEqualTo(afterDateEventsWithNewIndexes.size)
+
         result.toSet must beEqualTo(afterDateEventsWithNewIndexes.toSet)
+
+        ok
       }
 
 
@@ -148,7 +151,7 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
 
 
-
+      ok
     }
 
   }

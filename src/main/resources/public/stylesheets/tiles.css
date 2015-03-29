@@ -1,0 +1,11 @@
+button {
+    height: 10em;
+    width: 10em;
+    padding: 2em;
+}
+
+#tiles{
+    text-align: center;
+    margin-top: 10%;
+
+}

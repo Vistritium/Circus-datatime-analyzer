@@ -71,7 +71,17 @@ trait DateTimeEventService extends HttpService {
           }
         }
       }
+    } ~ path("providers") {
+      get {
+        complete(getProviders())
+      }
     }
+
+  def getProviders(): Future[JsArray] ={
+    DateTimeEvent.getProviders() map { list =>
+      JsArray(list.map(JsString(_)).toVector)
+    }
+  }
 
   def updateEvent() = {
 

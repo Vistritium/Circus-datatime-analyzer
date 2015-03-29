@@ -12,16 +12,55 @@ import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, _}
 import reactivemongo.core.commands.Count
 import spray.json.{JsArray, JsObject, JsString, JsValue}
 
+import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
+import scala.concurrent.duration._
+
 
 case class DateTimeEvent(id: String, provider: String, user: String, from: DateTime, to: DateTime)
 
 object DateTimeEvent {
 
-  val collectionName = "dateTimeEvents";
-  val collection = MongoDB.db[BSONCollection]("dateTimeEvents")
+  private val collectionName = "dateTimeEvents";
+  private val collection = MongoDB.db[BSONCollection]("dateTimeEvents")
+
+  private val providersCollection = MongoDB.db[BSONCollection]("dateTimeProviders")
+
+  private def updateProviders(provider: String): Unit = {
+
+    val future = getProviders() map {
+      currentProviders => {
+        if(!currentProviders.map(_.toLowerCase).contains(provider.toLowerCase)){
+          println("New provider: " + provider)
+          Await.result(insertProvider(provider), 50 seconds)
+        }
+      }
+    }
+
+    Await.result(future, 1 minute)
+  }
+
+  private def insertProvider(provider: String) = {
+    providersCollection.insert(BSONDocument("provider" -> provider))
+  }
+
+  def getProviders(): Future[List[String]] = {
+
+    val providersQuery = providersCollection.find(BSONDocument())
+
+    val providers = providersQuery.cursor.collect[List]()
+
+    providers map {
+      _ map {
+        doc => {
+          doc.getAs[String]("provider").get
+        }
+      }
+    }
+
+  }
 
 
   def getByDate(from: Option[DateTime], to: Option[DateTime] = None, provider: Option[String] = None, user: Option[String] = None): Future[List[DateTimeEvent]] = {
@@ -147,6 +186,7 @@ object DateTimeEvent {
 
 
   private[this] def insert(dataTimeEvent: DateTimeEvent): Future[String] = {
+    updateProviders(dataTimeEvent.provider)
     val id = BSONObjectID.generate.stringify
     val dataWithGeneratedId = dataTimeEvent.copy(id = id)
     collection.insert(DateTimeEventFormat.write(dataWithGeneratedId)).map(x => id)

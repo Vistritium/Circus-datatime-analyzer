@@ -16,8 +16,6 @@ class AppServicesSpec extends Specification with Specs2RouteTest with DateTimeEv
   sequential
   def actorRefFactory = system
 
-  val providerName = "testProvider";
-
   "DateTimeEventService should work" in {
 
     "updating should work" in {
@@ -25,7 +23,7 @@ class AppServicesSpec extends Specification with Specs2RouteTest with DateTimeEv
       val jsVal = JsObject(
         "appear" -> DateTime.now.minusHours(3).toJson,
         "disappear" -> DateTime.now.toJson,
-        "provider" -> JsString(providerName),
+        "provider" -> JsString(DBTestUtils.testProvider),
         "user" -> JsString("TestUser")
       )
 
@@ -41,7 +39,7 @@ class AppServicesSpec extends Specification with Specs2RouteTest with DateTimeEv
       sequential
 
       val jsVal = JsObject(
-      "provider" -> JsString(providerName),
+      "provider" -> JsString(DBTestUtils.testProvider),
       "user" -> JsString("randomUser")
       )
 
