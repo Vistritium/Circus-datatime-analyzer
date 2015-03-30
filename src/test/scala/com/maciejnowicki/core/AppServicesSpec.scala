@@ -12,7 +12,7 @@ import AppJsonProtocol._
 import spray.httpx.SprayJsonSupport.sprayJsonMarshaller
 import spray.httpx.SprayJsonSupport.sprayJsonUnmarshaller
 
-class AppServicesSpec extends Specification with Specs2RouteTest with DateTimeEventService {
+class AppServicesSpec extends Specification with Specs2RouteTest with DateTimeEventController {
   sequential
   def actorRefFactory = system
 
@@ -67,17 +67,5 @@ class AppServicesSpec extends Specification with Specs2RouteTest with DateTimeEv
       ok
     }
 
-/*    "leave GET requests to other paths unhandled" >> {
-      Get("/kermit") ~> resourceRoute ~> check {
-        handled must beFalse
-      }
-    }*/
-
-/*    "return a MethodNotAllowed error for PUT requests to the root path" >> {
-      Put() ~> sealRoute(resourceRoute) ~> check {
-        status === MethodNotAllowed
-        responseAs[String] === "HTTP method not allowed, supported methods: GET"
-      }
-    }*/
   }
 }

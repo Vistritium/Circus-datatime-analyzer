@@ -117,7 +117,6 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
         DBTestUtils.removeAllTestElements()
 
-
         Await.result(Future.sequence(beforeDateEvents map DateTimeEvent.insertUpdate), 10 seconds)
 
         val newIndexes = Await.result(Future.sequence(afterDateEvents map DateTimeEvent.insertUpdate), 10 seconds)
@@ -135,22 +134,6 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
 
         ok
       }
-
-
-
-/*      "getByDate with user specified should work " in {
-
-
-        val (left, right) = afterDateEvents.splitAt(2)
-
-
-
-
-      }*/
-
-
-
-
       ok
     }
 

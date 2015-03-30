@@ -26,7 +26,9 @@ libraryDependencies ++= {
     "org.specs2"          %%  "specs2-core"   % "2.3.11" % "test",
     "org.reactivemongo" %% "reactivemongo" % "0.10.5.0.akka23",
     "com.github.nscala-time" %% "nscala-time" % "1.8.0",
-    "io.spray" %%  "spray-json" % "1.3.1"
+    "io.spray" %%  "spray-json" % "1.3.1",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+    "ch.qos.logback" % "logback-classic" % "1.1.3"
   )
 }
 

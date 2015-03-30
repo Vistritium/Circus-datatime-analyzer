@@ -1,12 +1,12 @@
 package com.maciejnowicki.core
 
+import com.typesafe.scalalogging.StrictLogging
 import spray.routing.HttpService
 
-trait ResourcesService extends HttpService {
+trait ResourcesController extends HttpService with StrictLogging {
 
   val resourceRoute =
     pathPrefix("res") {
-      println("res matched")
       get {
         unmatchedPath {
           remaining => {
@@ -21,16 +21,10 @@ trait ResourcesService extends HttpService {
     } ~ path("events" / Segment) {
       provider => {
         get {
-          println("Matched events, provider: " + provider)
+          logger.info("Matched events, provider: " + provider)
           getFromResource("public/views/events.html")
         }
       }
     }
-
-
-  def getFile(path: String) = {
-    println(path)
-
-  }
 
 }

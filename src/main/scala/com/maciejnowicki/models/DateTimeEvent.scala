@@ -4,27 +4,26 @@ import java.text.MessageFormat
 
 import com.maciejnowicki.core.MongoDB
 import com.maciejnowicki.utils.TimeUtils
-import org.apache.logging.log4j.Logger
+import com.typesafe.scalalogging.StrictLogging
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, _}
 import reactivemongo.core.commands.Count
-import spray.json.{JsArray, JsObject, JsString, JsValue}
+import spray.json.{JsArray, JsObject, JsString}
 
-import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
-import scala.concurrent.duration._
 
 
 case class DateTimeEvent(id: String, provider: String, user: String, from: DateTime, to: DateTime)
 
-object DateTimeEvent {
+object DateTimeEvent extends StrictLogging{
 
   private val collectionName = "dateTimeEvents";
-  private val collection = MongoDB.db[BSONCollection]("dateTimeEvents")
+  private val collection = MongoDB.db[BSONCollection](collectionName)
 
   private val providersCollection = MongoDB.db[BSONCollection]("dateTimeProviders")
 
@@ -33,7 +32,7 @@ object DateTimeEvent {
     val future = getProviders() map {
       currentProviders => {
         if(!currentProviders.map(_.toLowerCase).contains(provider.toLowerCase)){
-          println("New provider: " + provider)
+          logger.info("New provider: " + provider)
           Await.result(insertProvider(provider), 50 seconds)
         }
       }
@@ -60,6 +59,7 @@ object DateTimeEvent {
       }
     }
 
+
   }
 
 
@@ -67,7 +67,7 @@ object DateTimeEvent {
 
     require(from.isDefined || to.isDefined, "from or to date must be defined")
 
-    println(s"geting from $from to $to with provider $provider with user $user")
+    logger.info(s"geting from $from to $to with provider $provider with user $user")
 
     val fromQuery = from.map(from => {
       BSONDocument("to" -> BSONDocument("$gte" -> BSONDateTime(from.getMillis)))
@@ -90,7 +90,7 @@ object DateTimeEvent {
     collection.find(query).cursor.collect[List]().map {
       result => {
         val size = result.size
-        println(MessageFormat.format("returning {0} elements", size.toString))
+        logger.info(MessageFormat.format("returning {0} elements", size.toString))
         result.map(DateTimeEventFormat.read(_))
       }
     }

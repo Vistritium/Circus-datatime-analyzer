@@ -1,8 +1,9 @@
 package com.maciejnowicki.core
 
 import com.typesafe.config.{ConfigException, ConfigFactory}
+import com.typesafe.scalalogging.StrictLogging
 
-object Configs {
+object Configs extends StrictLogging{
 
   val config = ConfigFactory.load()
 
@@ -16,7 +17,7 @@ object Configs {
     Some(config.getString("mongo.mongoUri"))
   } catch {
     case e: ConfigException.Missing => {
-      println("MONGOLAB_URI does not exist")
+      logger.info("MONGOLAB_URI does not exist")
       None
     }
    }
