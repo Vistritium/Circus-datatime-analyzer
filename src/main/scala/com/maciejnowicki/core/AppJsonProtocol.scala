@@ -29,23 +29,14 @@ object AppJsonProtocol extends DefaultJsonProtocol {
 
     override def read(json: JsValue): DateTimeEvent = json match {
       case JsObject(x) => {
-        try {
-          DateTimeEvent(
-            x.getOrElse("id", JsString("-1")).asInstanceOf[JsString].value,
-            x("provider").asInstanceOf[JsString].value,
-            x("user").asInstanceOf[JsString].value,
-            YodaDateTimeConverter.read(x("appear")),
-            YodaDateTimeConverter.read(x("disappear"))
-          )
-        } catch {
-          case e: Exception => {
-            e.printStackTrace()
-            throw e;
-          }
-        }
-
+        DateTimeEvent(
+          x.getOrElse("id", JsString("-1")).asInstanceOf[JsString].value,
+          x("provider").asInstanceOf[JsString].value,
+          x("user").asInstanceOf[JsString].value,
+          YodaDateTimeConverter.read(x("appear")),
+          YodaDateTimeConverter.read(x("disappear"))
+        )
       }
-      case _ => throw new DeserializationException("JsString expected")
     }
   }
 
