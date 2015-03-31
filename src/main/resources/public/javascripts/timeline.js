@@ -60,15 +60,19 @@ function transformToTimetableData(data) {
             var appear = timeTable.appear;
             var disappear = timeTable.disappear;
 
+            var appearMoment = moment(appear)
+            var disappearMoment = moment(disappear)
+
             var entry = {
                 id: counter,
                 content: name,
                 start: appear,
-                group: name
+                group: name,
+                title: name + "  " + appearMoment.format("HH:MM") + "-" + disappearMoment.format("HH:MM")
             };
 
             var interval = new Date(disappear).getTime() - new Date(appear).getTime();
-            if (interval > 1000 * 60 * name.length * 2) {
+            if (interval > 1000 * 60 * 60) {
                 entry.end = disappear;
             }
 
@@ -94,8 +98,8 @@ function createTimeLine(id, from, to, filter) {
             // Configuration for the Timeline
             var options = {
                 align: "left",
-                max: to.toISOString(),
-                min: from.toISOString(),
+                start: from.toISOString(),
+                end: to.toISOString(),
                 showCurrentTime: true,
                 zoomable: false,
                 clickToUse: true/*,
