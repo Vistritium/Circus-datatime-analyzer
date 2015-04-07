@@ -42,8 +42,6 @@ object DateTimeEventService {
   }
 
   def getData(getDataRequest: GetDataRequest): Either[String, Future[JsArray]] = {
-
-
     if (getDataRequest.from.isEmpty && getDataRequest.to.isEmpty) {
       Left("appear and disappear were empty, one must be defined")
     } else {

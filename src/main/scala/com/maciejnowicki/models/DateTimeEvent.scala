@@ -1,6 +1,7 @@
 package com.maciejnowicki.models
 
 import java.text.MessageFormat
+import java.util.concurrent.locks.ReentrantLock
 
 import com.maciejnowicki.core.MongoDB
 import com.maciejnowicki.utils.TimeUtils
@@ -22,6 +23,8 @@ case class DateTimeEvent(id: String, provider: String, user: String, from: DateT
 
 object DateTimeEvent extends StrictLogging{
 
+  val updateProviderLock = new ReentrantLock()
+
   private val collectionName = "dateTimeEvents";
   private val collection = MongoDB.db[BSONCollection](collectionName)
 
@@ -29,11 +32,22 @@ object DateTimeEvent extends StrictLogging{
 
   private def updateProviders(provider: String): Unit = {
 
+
+
     val future = getProviders() map {
       currentProviders => {
         if(!currentProviders.map(_.toLowerCase).contains(provider.toLowerCase)){
-          logger.info("New provider: " + provider)
-          Await.result(insertProvider(provider), 50 seconds)
+
+          updateProviderLock.lock()
+          try {
+            val currentProviders = Await.result(getProviders(), 30 seconds)
+            if(!currentProviders.map(_.toLowerCase).contains(provider.toLowerCase)){
+              logger.info("New provider: " + provider)
+              Await.result(insertProvider(provider), 50 seconds)
+            }
+          } finally {
+            updateProviderLock.unlock()
+          }
         }
       }
     }

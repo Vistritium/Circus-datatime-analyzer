@@ -14,7 +14,7 @@ object Boot extends App with StrictLogging{
 
   implicit val system = ActorSystem("circus-datatime-analyzer")
 
-  val service = system.actorOf(Props[AppServices], "mainService")
+  val service = system.actorOf(Props[AppControllers], "mainService")
 
   implicit val timeout = Timeout(5.seconds)
 

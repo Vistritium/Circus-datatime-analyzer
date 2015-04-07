@@ -8,7 +8,7 @@ import StatusCodes._
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
-class AppServices extends Actor with ResourcesController with DateTimeEventController{
+class AppControllers extends Actor with ResourcesController with DateTimeEventController{
 
 /*  implicit val myRejectionHandler = RejectionHandler {
     case MissingCookieRejection(cookieName) :: _ =>
