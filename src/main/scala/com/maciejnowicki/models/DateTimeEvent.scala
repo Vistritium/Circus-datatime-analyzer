@@ -19,7 +19,7 @@ import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 
 
-case class DateTimeEvent(id: String, provider: String, user: String, from: DateTime, to: DateTime)
+case class DateTimeEvent(id: String, provider: String, user: String, from: DateTime, to: DateTime, description: Option[String] = None)
 
 object DateTimeEvent extends StrictLogging{
 
@@ -239,7 +239,8 @@ object DateTimeEventFormat extends BSONDocumentReader[DateTimeEvent] with BSONDo
     "provider" -> event.provider,
     "user" -> event.user,
     "from" -> BSONDateTime(event.from.getMillis),
-    "to" -> BSONDateTime(event.to.getMillis)
+    "to" -> BSONDateTime(event.to.getMillis),
+    "description" -> event.description
   )
 
   override def read(bson: BSONDocument): DateTimeEvent = {
@@ -248,7 +249,8 @@ object DateTimeEventFormat extends BSONDocumentReader[DateTimeEvent] with BSONDo
       bson.getAs[String]("provider").get,
       bson.getAs[String]("user").get,
       toDataTime(bson.getAs[BSONDateTime]("from").get),
-      toDataTime(bson.getAs[BSONDateTime]("to").get)
+      toDataTime(bson.getAs[BSONDateTime]("to").get),
+      bson.getAs[String]("description")
     )
   }
 

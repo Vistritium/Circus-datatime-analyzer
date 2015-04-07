@@ -14,7 +14,7 @@ import scala.concurrent.Future
 
 trait DateTimeEventController extends HttpService {
   implicit val getDataRequestFormat = jsonFormat4(GetDataRequest)
-  implicit val eventDataFormat = jsonFormat5(DateTimeEvent.apply)
+  implicit val eventDataFormat = jsonFormat6(DateTimeEvent.apply)
   implicit val pingEventFormat = jsonFormat2(PingEventRequest)
 
   val dateTimeEventRoute =

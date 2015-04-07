@@ -19,13 +19,16 @@ object AppJsonProtocol extends DefaultJsonProtocol {
   }
 
   implicit object DateEventConverter extends RootJsonFormat[DateTimeEvent] {
-    override def write(obj: DateTimeEvent): JsValue = JsObject(
-      obj.user -> JsString("user"),
-      obj.provider -> JsString("provider"),
-      "appear" -> YodaDateTimeConverter.write(obj.from),
-      "disappear" -> YodaDateTimeConverter.write(obj.to),
-      "id" -> JsString(obj.id)
-    )
+    override def write(obj: DateTimeEvent): JsValue = {
+      JsObject(
+        obj.user -> JsString("user"),
+        obj.provider -> JsString("provider"),
+        "appear" -> YodaDateTimeConverter.write(obj.from),
+        "disappear" -> YodaDateTimeConverter.write(obj.to),
+        "id" -> JsString(obj.id),
+        "description" -> obj.description.map(JsString(_)).getOrElse(JsNull)
+      )
+    }
 
     override def read(json: JsValue): DateTimeEvent = json match {
       case JsObject(x) => {
@@ -34,7 +37,11 @@ object AppJsonProtocol extends DefaultJsonProtocol {
           x("provider").asInstanceOf[JsString].value,
           x("user").asInstanceOf[JsString].value,
           YodaDateTimeConverter.read(x("appear")),
-          YodaDateTimeConverter.read(x("disappear"))
+          YodaDateTimeConverter.read(x("disappear")),
+          x.get("description").flatMap {
+            case jsString: JsString => Some(jsString.value)
+            case _ => None
+          }
         )
       }
     }

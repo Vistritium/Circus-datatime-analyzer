@@ -137,6 +137,24 @@ class DateTimeEventTest extends Specification with NoTimeConversions {
       ok
     }
 
+    "test adding and retrieving elements with description " in {
+
+      DBTestUtils.removeAllTestElements()
+
+      val descriptions = "Hello, this is some description" :: "Goodbye, I'm done with this" :: Nil
+
+      val elements = descriptions.map(x => exampleEvent.copy(description = Some(x)))
+
+      val inserted = Await.result(Future.sequence(elements map DateTimeEvent.insertUpdate), 10 seconds)
+      inserted foreach(_.isDefined must beTrue)
+
+      val insertedElements = Await.result(Future.sequence(inserted.map(x => DateTimeEvent.get(x.get).map(_.get))), 30 seconds)
+
+      insertedElements.foreach(x => descriptions must contain(x.description.get))
+
+      ok
+    }
+
   }
 
 
