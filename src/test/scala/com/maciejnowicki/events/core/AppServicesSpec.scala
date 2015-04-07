@@ -1,7 +1,7 @@
-package com.maciejnowicki.core
+package com.maciejnowicki.events.core
 
-import com.maciejnowicki.DBTestUtils
-import com.maciejnowicki.models.DateTimeEvent
+import com.maciejnowicki.events.DBTestUtils
+import com.maciejnowicki.events.models.DateTimeEvent
 import org.specs2.mutable.Specification
 import spray.json._
 import spray.testkit.Specs2RouteTest

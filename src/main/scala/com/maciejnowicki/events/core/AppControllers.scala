@@ -1,4 +1,4 @@
-package com.maciejnowicki.core
+package com.maciejnowicki.events.core
 
 import akka.actor.Actor
 import spray.http.MediaTypes._

@@ -1,9 +1,8 @@
-package com.maciejnowicki.services
+package com.maciejnowicki.events.services
 
 import java.text.MessageFormat
-
-import com.maciejnowicki.core.Configs
-import com.maciejnowicki.models.DateTimeEvent
+import com.maciejnowicki.events.core.Configs
+import com.maciejnowicki.events.models.DateTimeEvent
 import org.joda.time.{Period, DateTime}
 import spray.json.{JsString, JsArray}
 import scala.concurrent.ExecutionContext.Implicits.global

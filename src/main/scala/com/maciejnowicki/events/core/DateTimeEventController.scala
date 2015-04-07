@@ -1,8 +1,9 @@
-package com.maciejnowicki.core
+package com.maciejnowicki.events.core
 
-import com.maciejnowicki.core.AppJsonProtocol._
-import com.maciejnowicki.models.DateTimeEvent
-import com.maciejnowicki.services.{DateTimeEventService, GetDataRequest, PingEventRequest}
+import AppJsonProtocol._
+import com.maciejnowicki.events.models.DateTimeEvent
+import com.maciejnowicki.events.services.{PingEventRequest, DateTimeEventService, GetDataRequest}
+import com.maciejnowicki.services.PingEventRequest
 import spray.http.MediaTypes._
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport.{sprayJsonMarshaller, sprayJsonUnmarshaller}

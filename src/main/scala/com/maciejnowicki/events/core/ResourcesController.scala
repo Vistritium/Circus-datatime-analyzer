@@ -1,4 +1,4 @@
-package com.maciejnowicki.core
+package com.maciejnowicki.events.core
 
 import com.typesafe.scalalogging.StrictLogging
 import spray.routing.HttpService

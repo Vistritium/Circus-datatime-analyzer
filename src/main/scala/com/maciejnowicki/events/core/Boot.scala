@@ -1,4 +1,4 @@
-package com.maciejnowicki.core
+package com.maciejnowicki.events.core
 
 import akka.actor.{ActorSystem, Props}
 import akka.io.IO

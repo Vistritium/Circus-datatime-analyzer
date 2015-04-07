@@ -1,7 +1,7 @@
-package com.maciejnowicki.core
+package com.maciejnowicki.events.core
 
-import com.maciejnowicki.models.DateTimeEvent
-import com.maciejnowicki.utils.TimeUtils
+import com.maciejnowicki.events.models.DateTimeEvent
+import com.maciejnowicki.events.utils.TimeUtils
 import org.joda.time.DateTime
 import spray.json._
 
