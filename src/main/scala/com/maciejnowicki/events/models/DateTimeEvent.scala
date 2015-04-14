@@ -4,7 +4,6 @@ import java.text.MessageFormat
 import java.util.concurrent.locks.ReentrantLock
 import com.maciejnowicki.events.core.MongoDB
 import com.maciejnowicki.events.utils.TimeUtils
-import TimeUtils
 import com.typesafe.scalalogging.StrictLogging
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
